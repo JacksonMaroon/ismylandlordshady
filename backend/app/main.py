@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,6 +10,7 @@ from app.database import engine, Base, get_db
 from app.logging_config import setup_logging, get_logger
 from app.middleware import RequestLoggingMiddleware, ErrorHandlingMiddleware
 from app.cache import close_cache
+from pipeline.runner import run_all
 
 # Set up logging first
 setup_logging()
@@ -56,6 +57,7 @@ app.add_middleware(
         "http://localhost:3000",
         "https://ismylandlordshady.nyc",
         "https://www.ismylandlordshady.nyc",
+        "https://frontend-two-kohl-50.vercel.app",  # Production Vercel App
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -94,3 +96,11 @@ async def health_check(db: AsyncSession = Depends(get_db)):
         health_status["database"] = "disconnected"
 
     return health_status
+
+
+@app.post("/admin/pipeline/trigger")
+async def trigger_pipeline(background_tasks: BackgroundTasks, full_refresh: bool = False):
+    """Trigger the data pipeline as a background task."""
+    logger.info(f"Received pipeline trigger request. Full refresh: {full_refresh}")
+    background_tasks.add_task(run_all, full_refresh=full_refresh)
+    return {"message": "Pipeline triggered in background", "full_refresh": full_refresh}
