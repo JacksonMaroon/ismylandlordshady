@@ -1,9 +1,13 @@
 from pydantic_settings import BaseSettings
+from pydantic import Field, field_validator
 from functools import lru_cache
 
 
 class Settings(BaseSettings):
-    database_url: str = "postgresql+asyncpg://landlord:landlord_dev_password@localhost:5432/landlord_shady"
+    database_url: str = Field(
+        default="postgresql+asyncpg://landlord:landlord_dev_password@localhost:5432/landlord_shady",
+        validation_alias="DATABASE_URL"
+    )
     socrata_app_token: str = ""
     socrata_base_url: str = "https://data.cityofnewyork.us"
     socrata_rate_limit: int = 10  # requests per second
@@ -26,8 +30,19 @@ class Settings(BaseSettings):
     acris_parties_dataset: str = "636b-3b5g"
     acris_legals_dataset: str = "8h5j-fqxa"
 
+    @field_validator("database_url", mode="after")
+    @classmethod
+    def convert_database_url(cls, v: str) -> str:
+        """Convert postgresql:// or postgres:// to postgresql+asyncpg:// for async support."""
+        if v.startswith("postgresql://"):
+            return v.replace("postgresql://", "postgresql+asyncpg://", 1)
+        elif v.startswith("postgres://"):
+            return v.replace("postgres://", "postgresql+asyncpg://", 1)
+        return v
+
     class Config:
         env_file = ".env"
+        extra = "ignore"
 
 
 @lru_cache()
