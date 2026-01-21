@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgis/postgis:15-3.3
+    container_name: landlord_db
+    environment:
+      POSTGRES_USER: landlord
+      POSTGRES_PASSWORD: landlord_dev_password
+      POSTGRES_DB: landlord_shady
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U landlord -d landlord_shady"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: landlord_backend
+    environment:
+      DATABASE_URL: postgresql+asyncpg://landlord:landlord_dev_password@db:5432/landlord_shady
+      SOCRATA_APP_TOKEN: ${SOCRATA_APP_TOKEN:-}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  pipeline:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: landlord_pipeline
+    environment:
+      DATABASE_URL: postgresql+asyncpg://landlord:landlord_dev_password@db:5432/landlord_shady
+      SOCRATA_APP_TOKEN: ${SOCRATA_APP_TOKEN:-}
+    volumes:
+      - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles:
+      - pipeline
+    command: python -m pipeline.runner
+
+volumes:
+  postgres_data:
