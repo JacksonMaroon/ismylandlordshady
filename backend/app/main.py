@@ -25,11 +25,13 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting IsMyLandlordShady.nyc API...")
 
-    # Create tables if they don't exist
-    async with engine.begin() as conn:
-        await conn.run_sync(lambda sync_conn: Base.metadata.create_all(sync_conn, checkfirst=True))
-
-    logger.info("Database tables verified")
+    if settings.auto_create_tables:
+        # Create tables if they don't exist (useful for local/dev).
+        async with engine.begin() as conn:
+            await conn.run_sync(lambda sync_conn: Base.metadata.create_all(sync_conn, checkfirst=True))
+        logger.info("Database tables verified")
+    else:
+        logger.info("AUTO_CREATE_TABLES disabled; skipping metadata.create_all()")
     logger.info("API startup complete")
 
     yield

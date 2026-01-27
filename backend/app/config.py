@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     # Logging
     log_level: str = "INFO"
 
+    # Database lifecycle
+    auto_create_tables: bool = True
+
     # Cache (optional - uses in-memory if not set)
     redis_url: str = ""
 

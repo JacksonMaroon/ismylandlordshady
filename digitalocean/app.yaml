@@ -31,6 +31,9 @@ services:
   - key: LOG_LEVEL
     scope: RUN_TIME
     value: INFO
+  - key: AUTO_CREATE_TABLES
+    scope: RUN_TIME
+    value: "false"
   - key: DATABASE_URL
     scope: RUN_TIME
     # When you attach a DigitalOcean database named "db" to this app,
