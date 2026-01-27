@@ -22,7 +22,7 @@ class EvictionsExtractor(BaseExtractor):
 
     def transform_record(self, record: dict[str, Any]) -> dict[str, Any] | None:
         """Transform eviction record to model fields."""
-        court_index = record.get("courtindexnumber")
+        court_index = record.get("court_index_number") or record.get("courtindexnumber")
         if not court_index:
             return None
 
@@ -35,18 +35,18 @@ class EvictionsExtractor(BaseExtractor):
 
         return {
             "court_index_number": court_index,
-            "docket_number": record.get("docketnumber"),
+            "docket_number": record.get("docket_number") or record.get("docketnumber"),
             "bbl": bbl,
-            "eviction_address": record.get("evictionaddress"),
-            "apt_seal": record.get("aptseal"),
-            "executed_date": self.parse_date(record.get("executeddate")),
-            "marshal_first_name": record.get("marshalfirstname"),
-            "marshal_last_name": record.get("marshallastname"),
-            "residential_commercial": record.get("residentialcommercialind"),
+            "eviction_address": record.get("eviction_address") or record.get("evictionaddress"),
+            "apt_seal": record.get("eviction_apt_num") or record.get("aptseal"),
+            "executed_date": self.parse_date(record.get("executed_date") or record.get("executeddate")),
+            "marshal_first_name": record.get("marshal_first_name") or record.get("marshalfirstname"),
+            "marshal_last_name": record.get("marshal_last_name") or record.get("marshallastname"),
+            "residential_commercial": record.get("residential_commercial_ind") or record.get("residentialcommercialind"),
             "borough": record.get("borough"),
             "ejectment": record.get("ejectment"),
-            "eviction_zip": record.get("evictionzip"),
-            "scheduled_status": record.get("scheduledstatus"),
+            "eviction_zip": record.get("eviction_zip") or record.get("evictionzip"),
+            "scheduled_status": record.get("eviction_possession") or record.get("scheduledstatus"),
             "latitude": record.get("latitude"),
             "longitude": record.get("longitude"),
         }
