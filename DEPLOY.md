@@ -28,6 +28,45 @@ railway add --database postgresql
 railway up
 ```
 
+## Deploy to DigitalOcean (App Platform)
+
+This repo includes an App Platform spec at `digitalocean/app.yaml` that points at the FastAPI backend in `backend/`, and defines a post-deploy migration job.
+
+### Dashboard Method
+
+1. Create a managed PostgreSQL database in DigitalOcean (ideally in NYC).
+2. In the database SQL console, enable extensions:
+   ```sql
+   CREATE EXTENSION IF NOT EXISTS postgis;
+   CREATE EXTENSION IF NOT EXISTS pg_trgm;
+   ```
+3. Create a new App Platform app from your GitHub repo.
+4. When configuring the service, use:
+   Source directory: `backend`.
+   Dockerfile path: `Dockerfile`.
+   HTTP port: `8000`.
+5. Attach your managed PostgreSQL database to the app and name it `db` so `${db.DATABASE_URL}` can be resolved.
+6. Configure environment variables in App Platform:
+   ```bash
+   DATABASE_URL=${db.DATABASE_URL}
+   SOCRATA_APP_TOKEN=your_token_here
+   ALLOWED_ORIGINS=https://frontend-two-kohl-50.vercel.app,https://your-app.ondigitalocean.app
+   LOG_LEVEL=INFO
+   ```
+7. Deploy the app. The `migrate` job will run `alembic upgrade head` after each deploy.
+8. The `pipeline` job is scheduled to run monthly (1st of month at 5:00 AM America/New_York). Edit `digitalocean/app.yaml` if you want a different cadence.
+
+### CLI Method (Optional)
+
+If you use `doctl`, you can deploy from the included spec:
+
+```bash
+doctl auth init
+doctl apps create --spec digitalocean/app.yaml
+doctl apps list
+```
+This `doctl apps create --spec ...` flow is supported by DigitalOcean’s CLI.
+
 ## Deploy to Render
 
 1. Go to https://render.com and sign up/login

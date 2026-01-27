@@ -1,0 +1,87 @@
+name: ismylandlordshady-backend
+region: nyc
+
+databases:
+- name: db
+  engine: PG
+  cluster_name: ismylandlordshady-db
+  production: true
+
+services:
+- name: api
+  github:
+    repo: JacksonMaroon/ismylandlordshady
+    branch: main
+    deploy_on_push: true
+  source_dir: backend
+  dockerfile_path: backend/Dockerfile
+  http_port: 8000
+  instance_count: 1
+  instance_size_slug: apps-s-1vcpu-1gb
+  routes:
+  - path: /
+  health_check:
+    http_path: /health
+    initial_delay_seconds: 30
+    period_seconds: 10
+    timeout_seconds: 5
+    failure_threshold: 5
+    success_threshold: 1
+  envs:
+  - key: LOG_LEVEL
+    scope: RUN_TIME
+    value: INFO
+  - key: DATABASE_URL
+    scope: RUN_TIME
+    # When you attach a DigitalOcean database named "db" to this app,
+    # App Platform will provide ${db.DATABASE_URL} at runtime.
+    value: ${db.DATABASE_URL}
+  - key: SOCRATA_APP_TOKEN
+    scope: RUN_TIME
+    type: SECRET
+    value: ""
+
+jobs:
+- name: migrate
+  kind: POST_DEPLOY
+  github:
+    repo: JacksonMaroon/ismylandlordshady
+    branch: main
+    deploy_on_push: true
+  source_dir: backend
+  dockerfile_path: backend/Dockerfile
+  run_command: alembic upgrade head
+  instance_count: 1
+  instance_size_slug: apps-s-1vcpu-0.5gb
+  envs:
+  - key: LOG_LEVEL
+    scope: RUN_TIME
+    value: INFO
+  - key: DATABASE_URL
+    scope: RUN_TIME
+    value: ${db.DATABASE_URL}
+- name: pipeline
+  kind: SCHEDULED
+  schedule:
+    cron: "0 5 1 * *"
+    time_zone: America/New_York
+  github:
+    repo: JacksonMaroon/ismylandlordshady
+    branch: main
+    deploy_on_push: true
+  source_dir: backend
+  dockerfile_path: backend/Dockerfile
+  run_command: python -m pipeline.runner --extraction --entity-resolution --scoring
+  instance_count: 1
+  instance_size_slug: apps-s-1vcpu-1gb
+  envs:
+  - key: LOG_LEVEL
+    scope: RUN_TIME
+    value: INFO
+  - key: DATABASE_URL
+    scope: RUN_TIME
+    value: ${db.DATABASE_URL}
+  - key: SOCRATA_APP_TOKEN
+    scope: RUN_TIME
+    type: SECRET
+    value: ""

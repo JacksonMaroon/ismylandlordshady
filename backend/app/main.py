@@ -6,6 +6,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1 import router as v1_router
+from app.config import get_settings
 from app.database import engine, Base, get_db
 from app.logging_config import setup_logging, get_logger
 from app.middleware import RequestLoggingMiddleware, ErrorHandlingMiddleware
@@ -15,6 +16,8 @@ from pipeline.runner import run_all
 # Set up logging first
 setup_logging()
 logger = get_logger('main')
+settings = get_settings()
+logger.info("Configured CORS origins: %s", settings.allowed_origins)
 
 
 @asynccontextmanager
@@ -53,12 +56,7 @@ app.add_middleware(RequestLoggingMiddleware)
 # CORS middleware for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "https://ismylandlordshady.nyc",
-        "https://www.ismylandlordshady.nyc",
-        "https://frontend-two-kohl-50.vercel.app",  # Production Vercel App
-    ],
+    allow_origins=settings.allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
