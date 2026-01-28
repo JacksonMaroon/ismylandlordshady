@@ -10,7 +10,7 @@ class Eviction(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     court_index_number = Column(String(50), unique=True)
     docket_number = Column(String(50))
-    bbl = Column(String(10), ForeignKey("buildings.bbl"))
+    bbl = Column(String(10))
     eviction_address = Column(String(200))
     apt_seal = Column(String(50))
     executed_date = Column(Date)
