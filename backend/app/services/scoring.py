@@ -52,34 +52,238 @@ class ScoringService:
     CITY_AVG_RESOLUTION_DAYS = 30
 
     async def compute_all_scores(self):
-        """Compute scores for all buildings."""
-        logger.info("Starting score computation")
+        """Compute scores for all buildings using set-based SQL."""
+        logger.info("Starting score computation (set-based)")
         start = datetime.now()
 
+        score_sql = text(
+            """
+            WITH building_base AS (
+                SELECT
+                    bbl,
+                    GREATEST(COALESCE(total_units, 1), 1) AS units
+                FROM buildings
+            ),
+            violation_counts AS (
+                SELECT
+                    bbl,
+                    SUM(CASE WHEN violation_class = 'C' THEN 1 ELSE 0 END) AS class_c,
+                    SUM(CASE WHEN violation_class = 'B' THEN 1 ELSE 0 END) AS class_b,
+                    SUM(CASE WHEN violation_class = 'A' THEN 1 ELSE 0 END) AS class_a,
+                    SUM(CASE WHEN current_status IN ('OPEN', 'NOV SENT') THEN 1 ELSE 0 END) AS open_violations,
+                    COUNT(*) AS total_violations
+                FROM hpd_violations
+                WHERE bbl IS NOT NULL
+                GROUP BY bbl
+            ),
+            complaint_counts AS (
+                SELECT
+                    bbl,
+                    COUNT(*) AS total_complaints,
+                    AVG(days_to_resolve)::float AS avg_resolution_days
+                FROM complaints_311
+                WHERE bbl IS NOT NULL
+                GROUP BY bbl
+            ),
+            eviction_counts AS (
+                SELECT
+                    bbl,
+                    COUNT(*) AS total_evictions
+                FROM evictions
+                WHERE bbl IS NOT NULL
+                GROUP BY bbl
+            ),
+            portfolio_buildings AS (
+                SELECT
+                    rc.owner_portfolio_id,
+                    COUNT(DISTINCT hr.bbl) AS total_buildings
+                FROM registration_contacts rc
+                JOIN hpd_registrations hr ON rc.registration_id = hr.registration_id
+                WHERE rc.owner_portfolio_id IS NOT NULL
+                GROUP BY rc.owner_portfolio_id
+            ),
+            ownership_info AS (
+                SELECT
+                    hr.bbl,
+                    MAX(op.is_llc) AS is_llc,
+                    MAX(pb.total_buildings) AS total_buildings
+                FROM registration_contacts rc
+                JOIN hpd_registrations hr ON rc.registration_id = hr.registration_id
+                JOIN owner_portfolios op ON rc.owner_portfolio_id = op.id
+                JOIN portfolio_buildings pb ON pb.owner_portfolio_id = op.id
+                WHERE rc.contact_type = 'Owner'
+                GROUP BY hr.bbl
+            ),
+            scored AS (
+                SELECT
+                    b.bbl,
+                    b.units,
+                    COALESCE(v.total_violations, 0) AS total_violations,
+                    COALESCE(v.class_c, 0) AS class_c,
+                    COALESCE(v.class_b, 0) AS class_b,
+                    COALESCE(v.class_a, 0) AS class_a,
+                    COALESCE(v.open_violations, 0) AS open_violations,
+                    COALESCE(c.total_complaints, 0) AS total_complaints,
+                    COALESCE(e.total_evictions, 0) AS total_evictions,
+                    c.avg_resolution_days,
+                    COALESCE(o.is_llc, 0) AS is_llc,
+                    COALESCE(o.total_buildings, 0) AS total_buildings
+                FROM building_base b
+                LEFT JOIN violation_counts v ON b.bbl = v.bbl
+                LEFT JOIN complaint_counts c ON b.bbl = c.bbl
+                LEFT JOIN eviction_counts e ON b.bbl = e.bbl
+                LEFT JOIN ownership_info o ON b.bbl = o.bbl
+            ),
+            computed AS (
+                SELECT
+                    bbl,
+                    units,
+                    total_violations,
+                    class_c,
+                    class_b,
+                    class_a,
+                    open_violations,
+                    total_complaints,
+                    total_evictions,
+                    avg_resolution_days,
+                    LEAST(((class_c * 10 + class_b * 5 + class_a)::float / units) * 10, 100) AS violation_score,
+                    LEAST((total_complaints::float / units) * 20, 100) AS complaints_score,
+                    LEAST((total_evictions::float / units) * 50, 100) AS eviction_score,
+                    LEAST(
+                        (CASE WHEN is_llc = 1 THEN 30 ELSE 0 END) +
+                        (CASE
+                            WHEN total_buildings >= 100 THEN 70
+                            WHEN total_buildings >= 50 THEN 50
+                            WHEN total_buildings >= 20 THEN 30
+                            WHEN total_buildings >= 10 THEN 15
+                            ELSE 0
+                        END),
+                        100
+                    ) AS ownership_score,
+                    CASE
+                        WHEN avg_resolution_days IS NULL OR avg_resolution_days <= 30 THEN 0
+                        ELSE LEAST((avg_resolution_days - 30) * 2, 100)
+                    END AS resolution_score
+                FROM scored
+            ),
+            final AS (
+                SELECT
+                    bbl,
+                    total_violations,
+                    class_c,
+                    class_b,
+                    class_a,
+                    open_violations,
+                    total_complaints,
+                    total_evictions,
+                    avg_resolution_days,
+                    violation_score,
+                    complaints_score,
+                    eviction_score,
+                    ownership_score,
+                    resolution_score,
+                    LEAST(
+                        violation_score * 0.30 +
+                        complaints_score * 0.20 +
+                        eviction_score * 0.25 +
+                        ownership_score * 0.15 +
+                        resolution_score * 0.10,
+                        100
+                    ) AS overall_score,
+                    (total_violations::float / units) AS violations_per_unit,
+                    (total_complaints::float / units) AS complaints_per_unit,
+                    (total_evictions::float / units) AS evictions_per_unit
+                FROM computed
+            )
+            INSERT INTO building_scores (
+                bbl,
+                violation_score,
+                complaints_score,
+                eviction_score,
+                ownership_score,
+                resolution_score,
+                overall_score,
+                grade,
+                total_violations,
+                class_c_violations,
+                class_b_violations,
+                class_a_violations,
+                open_violations,
+                total_complaints,
+                total_evictions,
+                avg_resolution_days,
+                violations_per_unit,
+                complaints_per_unit,
+                evictions_per_unit,
+                created_at,
+                updated_at
+            )
+            SELECT
+                bbl,
+                ROUND(violation_score::numeric, 2),
+                ROUND(complaints_score::numeric, 2),
+                ROUND(eviction_score::numeric, 2),
+                ROUND(ownership_score::numeric, 2),
+                ROUND(resolution_score::numeric, 2),
+                ROUND(overall_score::numeric, 2),
+                CASE
+                    WHEN overall_score < 20 THEN 'A'
+                    WHEN overall_score < 40 THEN 'B'
+                    WHEN overall_score < 60 THEN 'C'
+                    WHEN overall_score < 80 THEN 'D'
+                    ELSE 'F'
+                END,
+                total_violations,
+                class_c,
+                class_b,
+                class_a,
+                open_violations,
+                total_complaints,
+                total_evictions,
+                avg_resolution_days,
+                ROUND(violations_per_unit::numeric, 2),
+                ROUND(complaints_per_unit::numeric, 2),
+                ROUND(evictions_per_unit::numeric, 2),
+                NOW(),
+                NOW()
+            FROM final
+            ON CONFLICT (bbl) DO UPDATE SET
+                violation_score = EXCLUDED.violation_score,
+                complaints_score = EXCLUDED.complaints_score,
+                eviction_score = EXCLUDED.eviction_score,
+                ownership_score = EXCLUDED.ownership_score,
+                resolution_score = EXCLUDED.resolution_score,
+                overall_score = EXCLUDED.overall_score,
+                grade = EXCLUDED.grade,
+                total_violations = EXCLUDED.total_violations,
+                class_c_violations = EXCLUDED.class_c_violations,
+                class_b_violations = EXCLUDED.class_b_violations,
+                class_a_violations = EXCLUDED.class_a_violations,
+                open_violations = EXCLUDED.open_violations,
+                total_complaints = EXCLUDED.total_complaints,
+                total_evictions = EXCLUDED.total_evictions,
+                avg_resolution_days = EXCLUDED.avg_resolution_days,
+                violations_per_unit = EXCLUDED.violations_per_unit,
+                complaints_per_unit = EXCLUDED.complaints_per_unit,
+                evictions_per_unit = EXCLUDED.evictions_per_unit,
+                updated_at = NOW()
+            """
+        )
+
         async with AsyncSessionLocal() as session:
-            # Get all buildings with units
-            buildings = await self._get_buildings_with_units(session)
-            logger.info(f"Computing scores for {len(buildings)} buildings")
-
-            batch = []
-            for i, building in enumerate(buildings):
-                score_data = await self._compute_building_score(session, building)
-                if score_data:
-                    batch.append(score_data)
-
-                if len(batch) >= 1000:
-                    await self._upsert_scores(session, batch)
-                    batch = []
-                    logger.info(f"Processed {i + 1} buildings...")
-
-            if batch:
-                await self._upsert_scores(session, batch)
-
+            await session.execute(text("TRUNCATE building_scores"))
+            await session.execute(score_sql)
             await session.commit()
 
             # Compute percentiles
             await self._compute_percentiles(session)
             await session.commit()
+
+        # Update portfolio stats and scores after building scores are computed
+        from app.services.entity_resolution import EntityResolutionService
+
+        await EntityResolutionService().update_portfolio_stats()
+        await self.compute_portfolio_scores()
 
         elapsed = (datetime.now() - start).total_seconds()
         logger.info(f"Score computation complete in {elapsed:.1f}s")
