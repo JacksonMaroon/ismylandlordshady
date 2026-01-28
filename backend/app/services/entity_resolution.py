@@ -36,8 +36,8 @@ class EntityResolutionService:
             logger.info(f"Found {len(hash_groups)} distinct owner hash groups")
 
             # Step 2: Create portfolios from hash groups
-            portfolios = await self._create_portfolios_from_groups(session, hash_groups)
-            logger.info(f"Created {len(portfolios)} portfolios")
+            created_count = await self._create_portfolios_from_groups(session, hash_groups)
+            logger.info(f"Created {created_count} portfolios")
 
             # Step 3: Link contacts to portfolios (fast bulk SQL)
             await self._link_contacts_to_portfolios(session)
@@ -90,11 +90,21 @@ class EntityResolutionService:
         self,
         session: AsyncSession,
         hash_groups: dict[str, list[dict[str, Any]]],
-    ) -> list[OwnerPortfolio]:
+    ) -> int:
         """Create portfolio records from hash groups."""
-        portfolios = []
+        # Fetch existing hashes so reruns are idempotent.
+        existing_hashes = set(
+            (await session.execute(select(OwnerPortfolio.name_hash)))
+            .scalars()
+            .all()
+        )
+
+        portfolios: list[OwnerPortfolio] = []
 
         for name_hash, contacts in hash_groups.items():
+            if name_hash in existing_hashes:
+                continue
+
             # Use the contact with most occurrences as primary
             primary = max(contacts, key=lambda c: c["contact_count"])
 
@@ -113,7 +123,7 @@ class EntityResolutionService:
             portfolios.append(portfolio)
 
         await session.flush()
-        return portfolios
+        return len(portfolios)
 
     async def _fuzzy_merge_portfolios(
         self,
