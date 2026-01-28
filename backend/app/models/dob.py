@@ -8,7 +8,7 @@ class DOBViolation(Base):
     __tablename__ = "dob_violations"
 
     isn_dob_bis_viol = Column(String(50), primary_key=True)
-    bbl = Column(String(10), ForeignKey("buildings.bbl"))
+    bbl = Column(String(10))
     bin = Column(String(10))
     boro = Column(String(5))
     block = Column(String(10))
