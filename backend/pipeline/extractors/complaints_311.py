@@ -47,6 +47,11 @@ class Complaints311Extractor(BaseExtractor):
         types = ", ".join(f"'{t}'" for t in self.HOUSING_COMPLAINT_TYPES)
         return f"complaint_type IN ({types}) OR agency = 'HPD'"
 
+    @property
+    def order_clause(self) -> str | None:
+        """Order by created date descending to get newest complaints first."""
+        return "created_date DESC"
+
     def transform_record(self, record: dict[str, Any]) -> dict[str, Any] | None:
         """Transform 311 complaint record to model fields."""
         unique_key = self.safe_int(record.get("unique_key"))

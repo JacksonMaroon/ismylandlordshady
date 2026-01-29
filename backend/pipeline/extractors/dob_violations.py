@@ -16,6 +16,11 @@ class DOBViolationsExtractor(BaseExtractor):
     def model_class(self):
         return DOBViolation
 
+    @property
+    def order_clause(self) -> str | None:
+        """Order by issue date descending to get newest violations first."""
+        return "issue_date DESC"
+
     def transform_record(self, record: dict[str, Any]) -> dict[str, Any] | None:
         """Transform DOB violation record to model fields."""
         isn_dob = self._truncate(record.get("isn_dob_bis_viol") or record.get("isn_dob_bis_extract"), 20)

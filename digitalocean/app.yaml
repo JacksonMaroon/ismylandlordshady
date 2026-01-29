@@ -74,7 +74,7 @@ jobs:
     deploy_on_push: true
   source_dir: backend
   dockerfile_path: backend/Dockerfile
-  run_command: python -m pipeline.runner --extraction --entity-resolution --scoring
+  run_command: python -m pipeline.runner --dataset all --entity-resolution --scoring
   instance_count: 1
   instance_size_slug: apps-s-1vcpu-1gb
   envs:

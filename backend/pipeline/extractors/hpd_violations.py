@@ -16,6 +16,11 @@ class HPDViolationsExtractor(BaseExtractor):
     def model_class(self):
         return HPDViolation
 
+    @property
+    def order_clause(self) -> str | None:
+        """Order by inspection date descending to get newest violations first."""
+        return "inspectiondate DESC"
+
     def transform_record(self, record: dict[str, Any]) -> dict[str, Any] | None:
         """Transform HPD violation record to model fields."""
         violation_id = self.safe_int(record.get("violationid"))

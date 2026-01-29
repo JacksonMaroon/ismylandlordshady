@@ -19,6 +19,11 @@ class HPDRegistrationsExtractor(BaseExtractor):
     def model_class(self):
         return HPDRegistration
 
+    @property
+    def order_clause(self) -> str | None:
+        """Order by last registration date descending."""
+        return "lastregistrationdate DESC"
+
     def transform_record(self, record: dict[str, Any]) -> dict[str, Any] | None:
         """Transform HPD registration record to model fields."""
         registration_id = self.safe_int(record.get("registrationid"))

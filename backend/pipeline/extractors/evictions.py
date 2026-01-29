@@ -16,6 +16,11 @@ class EvictionsExtractor(BaseExtractor):
     def model_class(self):
         return Eviction
 
+    @property
+    def order_clause(self) -> str | None:
+        """Order by executed date descending to get newest evictions first."""
+        return "executed_date DESC"
+
     def get_primary_key_columns(self) -> list[str]:
         """Use court index number as unique identifier."""
         return ["court_index_number"]
