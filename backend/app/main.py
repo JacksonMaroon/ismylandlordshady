@@ -11,7 +11,7 @@ from app.database import engine, Base, get_db
 from app.logging_config import setup_logging, get_logger
 from app.middleware import RequestLoggingMiddleware, ErrorHandlingMiddleware
 from app.cache import close_cache
-from pipeline.runner import run_all
+from pipeline.runner import run_all, run_extractor, EXTRACTORS
 
 # Set up logging first
 setup_logging()
@@ -99,8 +99,26 @@ async def health_check(db: AsyncSession = Depends(get_db)):
 
 
 @app.post("/admin/pipeline/trigger")
-async def trigger_pipeline(background_tasks: BackgroundTasks, full_refresh: bool = False):
-    """Trigger the data pipeline as a background task."""
-    logger.info(f"Received pipeline trigger request. Full refresh: {full_refresh}")
-    background_tasks.add_task(run_all, full_refresh=full_refresh)
-    return {"message": "Pipeline triggered in background", "full_refresh": full_refresh}
+async def trigger_pipeline(
+    background_tasks: BackgroundTasks,
+    dataset: str | None = None,
+    full_refresh: bool = False
+):
+    """
+    Trigger the data pipeline as a background task.
+
+    Args:
+        dataset: Specific dataset to run (e.g., 'pluto', 'hpd_violations').
+                 If None, runs all datasets.
+        full_refresh: If True, truncate and reload instead of upsert.
+    """
+    if dataset:
+        if dataset not in EXTRACTORS:
+            return {"error": f"Unknown dataset: {dataset}. Available: {list(EXTRACTORS.keys())}"}
+        logger.info(f"Received pipeline trigger for dataset: {dataset}. Full refresh: {full_refresh}")
+        background_tasks.add_task(run_extractor, dataset, full_refresh)
+        return {"message": f"Pipeline triggered for {dataset}", "dataset": dataset, "full_refresh": full_refresh}
+    else:
+        logger.info(f"Received full pipeline trigger request. Full refresh: {full_refresh}")
+        background_tasks.add_task(run_all, full_refresh=full_refresh)
+        return {"message": "Full pipeline triggered in background", "full_refresh": full_refresh}
