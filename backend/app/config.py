@@ -45,6 +45,7 @@ class Settings(BaseSettings):
     acris_master_dataset: str = "bnx9-e6tj"
     acris_parties_dataset: str = "636b-3b5g"
     acris_legals_dataset: str = "8h5j-fqxa"
+    pluto_dataset: str = "64uk-42ks"
 
     @field_validator("database_url", mode="after")
     @classmethod

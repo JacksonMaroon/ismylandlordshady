@@ -9,6 +9,7 @@ from pipeline.extractors import (
     Complaints311Extractor,
     DOBViolationsExtractor,
     EvictionsExtractor,
+    PLUTOExtractor,
 )
 from pipeline.extractors.hpd_registrations import (
     RegistrationContactsExtractor,
@@ -24,6 +25,7 @@ logger = logging.getLogger(__name__)
 # Available datasets and their extractors
 EXTRACTORS = {
     "buildings": BuildingsFromRegistrationsExtractor,
+    "pluto": PLUTOExtractor,
     "hpd_registrations": HPDRegistrationsExtractor,
     "registration_contacts": RegistrationContactsExtractor,
     "hpd_violations": HPDViolationsExtractor,
@@ -35,6 +37,7 @@ EXTRACTORS = {
 # Recommended order for full data load
 LOAD_ORDER = [
     "buildings",
+    "pluto",
     "hpd_registrations",
     "registration_contacts",
     "hpd_violations",

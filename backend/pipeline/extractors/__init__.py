@@ -5,6 +5,7 @@ from pipeline.extractors.hpd_registrations import HPDRegistrationsExtractor
 from pipeline.extractors.complaints_311 import Complaints311Extractor
 from pipeline.extractors.dob_violations import DOBViolationsExtractor
 from pipeline.extractors.evictions import EvictionsExtractor
+from pipeline.extractors.pluto import PLUTOExtractor
 
 __all__ = [
     "SocrataClient",
@@ -14,4 +15,5 @@ __all__ = [
     "Complaints311Extractor",
     "DOBViolationsExtractor",
     "EvictionsExtractor",
+    "PLUTOExtractor",
 ]
