@@ -12,11 +12,11 @@ interface Props {
 export function ViolationTimeline({ bbl, recentViolations }: Props) {
   if (recentViolations.length === 0) {
     return (
-      <div className="bg-white rounded-xl border p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+      <div className="bg-white border border-[#D4CFC4] rounded-xl p-6">
+        <h2 className="font-serif text-lg font-bold text-[#1A1A1A] mb-4">
           Recent Violations
         </h2>
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-[#8A8A8A]">
           No violations found for this building.
         </div>
       </div>
@@ -24,12 +24,12 @@ export function ViolationTimeline({ bbl, recentViolations }: Props) {
   }
 
   return (
-    <div className="bg-white rounded-xl border p-6">
+    <div className="bg-white border border-[#D4CFC4] rounded-xl p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-gray-900">
+        <h2 className="font-serif text-lg font-bold text-[#1A1A1A]">
           Recent Violations
         </h2>
-        <span className="text-sm text-gray-500">
+        <span className="text-sm text-[#8A8A8A]">
           Showing {recentViolations.length} most recent
         </span>
       </div>
@@ -45,20 +45,33 @@ export function ViolationTimeline({ bbl, recentViolations }: Props) {
 
 function ViolationCard({ violation }: { violation: ViolationItem }) {
   const getIcon = () => {
-    switch (violation.class) {
+    switch (violation.violation_class) {
       case 'C':
-        return <AlertTriangle className="h-5 w-5 text-red-500" />;
+        return <AlertTriangle className="h-5 w-5 text-[#C65D3B]" />;
       case 'B':
-        return <AlertCircle className="h-5 w-5 text-orange-500" />;
+        return <AlertCircle className="h-5 w-5 text-[#D4846B]" />;
       case 'A':
-        return <Info className="h-5 w-5 text-yellow-500" />;
+        return <Info className="h-5 w-5 text-[#E09070]" />;
       default:
-        return <FileWarning className="h-5 w-5 text-gray-500" />;
+        return <FileWarning className="h-5 w-5 text-[#8A8A8A]" />;
+    }
+  };
+
+  const getClassColor = (violationClass: string) => {
+    switch (violationClass) {
+      case 'C':
+        return 'bg-[#C65D3B]/10 text-[#C65D3B] border-[#C65D3B]/20';
+      case 'B':
+        return 'bg-[#D4846B]/10 text-[#D4846B] border-[#D4846B]/20';
+      case 'A':
+        return 'bg-[#E09070]/10 text-[#E09070] border-[#E09070]/20';
+      default:
+        return 'bg-gray-100 text-gray-600 border-gray-200';
     }
   };
 
   return (
-    <div className="border rounded-lg p-4">
+    <div className="border border-[#D4CFC4] rounded-lg p-4">
       <div className="flex items-start gap-3">
         {/* Icon */}
         <div className="mt-1">{getIcon()}</div>
@@ -67,14 +80,14 @@ function ViolationCard({ violation }: { violation: ViolationItem }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             {/* Class Badge */}
-            {violation.class && (
+            {violation.violation_class && (
               <span
                 className={cn(
                   'px-2 py-0.5 text-xs font-medium rounded border',
-                  getViolationClassColor(violation.class)
+                  getClassColor(violation.violation_class)
                 )}
               >
-                Class {violation.class}
+                Class {violation.violation_class}
               </span>
             )}
 
@@ -84,8 +97,8 @@ function ViolationCard({ violation }: { violation: ViolationItem }) {
                 className={cn(
                   'px-2 py-0.5 text-xs rounded',
                   violation.status === 'OPEN'
-                    ? 'bg-red-100 text-red-700'
-                    : 'bg-gray-100 text-gray-700'
+                    ? 'bg-[#C65D3B]/10 text-[#C65D3B]'
+                    : 'bg-[#FAF7F2] text-[#4A4A4A]'
                 )}
               >
                 {violation.status}
@@ -94,12 +107,12 @@ function ViolationCard({ violation }: { violation: ViolationItem }) {
           </div>
 
           {/* Description */}
-          <p className="text-sm text-gray-700 mb-2">
+          <p className="text-sm text-[#4A4A4A] mb-2 leading-relaxed">
             {truncateText(violation.description, 200)}
           </p>
 
           {/* Meta info */}
-          <div className="flex items-center gap-4 text-xs text-gray-500">
+          <div className="flex items-center gap-4 text-xs text-[#8A8A8A]">
             <span>{formatDate(violation.inspection_date)}</span>
             {violation.apartment && (
               <span className="flex items-center gap-1">

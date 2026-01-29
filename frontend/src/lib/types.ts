@@ -51,7 +51,7 @@ export interface OwnerInfo {
 
 export interface ViolationItem {
   id: number;
-  class: string | null;
+  violation_class: string | null;
   status: string | null;
   inspection_date: string | null;
   description: string | null;
