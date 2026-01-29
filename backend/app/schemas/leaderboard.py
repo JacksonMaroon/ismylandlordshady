@@ -7,6 +7,7 @@ class LeaderboardBuilding(BaseModel):
     bbl: str
     address: Optional[str]
     borough: Optional[str]
+    zip_code: Optional[str]
     units: Optional[int]
     score: float
     grade: str

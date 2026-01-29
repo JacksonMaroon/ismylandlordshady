@@ -120,6 +120,7 @@ export interface LeaderboardBuilding {
   bbl: string;
   address: string | null;
   borough: string | null;
+  zip_code: string | null;
   units: number | null;
   score: number;
   grade: string;
