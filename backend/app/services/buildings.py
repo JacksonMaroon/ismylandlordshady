@@ -373,52 +373,44 @@ class BuildingService:
         limit: int = 50,
         violation_class: Optional[str] = None,
     ) -> list[dict]:
-        """Get recent violations across all buildings with building info."""
-        # Use mappers for proper parameter binding with SQLAlchemy text()
-        params = {"limit": limit}
+        """Get recent violations across all buildings."""
+        from app.models.hpd import HPDViolation
+        from app.models.building import Building
+        
+        # Build query
+        query = (
+            select(HPDViolation, Building.full_address, Building.borough)
+            .outerjoin(Building, HPDViolation.bbl == Building.bbl)
+            .where(HPDViolation.inspection_date.is_not(None))
+            .order_by(HPDViolation.inspection_date.desc())
+            .limit(limit)
+        )
         
         if violation_class:
-            where_clause = "WHERE v.inspection_date IS NOT NULL AND v.violation_class = :violation_class"
-            params["violation_class"] = violation_class
-        else:
-            where_clause = "WHERE v.inspection_date IS NOT NULL"
+            query = query.where(HPDViolation.violation_class == violation_class)
         
-        query = text(f"""
-            SELECT
-                v.violation_id,
-                v.violation_class,
-                v.current_status,
-                v.inspection_date,
-                v.nov_description,
-                v.apartment,
-                v.story,
-                v.bbl,
-                b.full_address,
-                b.borough
-            FROM hpd_violations v
-            LEFT JOIN buildings b ON v.bbl = b.bbl
-            {where_clause}
-            ORDER BY v.inspection_date DESC
-            LIMIT :limit
-        """)
-
-        result = await self.session.execute(query, params)
-
-        return [
-            {
-                "id": row.violation_id,
-                "class": row.violation_class,
-                "status": row.current_status,
-                "inspection_date": row.inspection_date.isoformat() if row.inspection_date else None,
-                "description": row.nov_description,
-                "apartment": row.apartment,
-                "story": row.story,
-                "bbl": row.bbl,
-                "address": row.full_address,
-                "borough": row.borough,
-            }
-            for row in result
-        ]
+        result = await self.session.execute(query)
+        
+        violations = []
+        for row in result:
+            violation = row[0]  # HPDViolation object
+            full_address = row[1]  # Building.full_address
+            borough = row[2]  # Building.borough
+            
+            violations.append({
+                "id": violation.violation_id,
+                "class": violation.violation_class,
+                "status": violation.current_status,
+                "inspection_date": violation.inspection_date.isoformat() if violation.inspection_date else None,
+                "description": violation.nov_description,
+                "apartment": violation.apartment,
+                "story": violation.story,
+                "bbl": violation.bbl,
+                "address": full_address,
+                "borough": borough,
+            })
+        
+        return violations
 
 
 class OwnerService:
