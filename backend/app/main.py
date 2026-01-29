@@ -138,3 +138,36 @@ async def trigger_entity_resolution(background_tasks: BackgroundTasks):
     logger.info("Received entity resolution trigger request")
     background_tasks.add_task(run_entity_resolution)
     return {"message": "Entity resolution triggered in background"}
+
+
+@app.get("/admin/entity-resolution/stats")
+async def entity_resolution_stats(db: AsyncSession = Depends(get_db)):
+    """Get entity resolution data quality stats."""
+    query = text("""
+        SELECT
+            COUNT(*) as total_contacts,
+            COUNT(CASE WHEN contact_type IN ('CorporateOwner', 'HeadOfficer', 'IndividualOwner', 'JointOwner', 'Officer', 'Shareholder', 'Owner') THEN 1 END) as owner_type_contacts,
+            COUNT(CASE WHEN contact_type IN ('CorporateOwner', 'HeadOfficer', 'IndividualOwner', 'JointOwner', 'Officer', 'Shareholder', 'Owner') AND name_hash IS NOT NULL THEN 1 END) as with_hash,
+            COUNT(CASE WHEN contact_type IN ('CorporateOwner', 'HeadOfficer', 'IndividualOwner', 'JointOwner', 'Officer', 'Shareholder', 'Owner') AND owner_portfolio_id IS NOT NULL THEN 1 END) as linked,
+            COUNT(CASE WHEN contact_type IN ('CorporateOwner', 'HeadOfficer', 'IndividualOwner', 'JointOwner', 'Officer', 'Shareholder', 'Owner') AND (full_name IS NULL OR full_name = '') THEN 1 END) as empty_name,
+            COUNT(CASE WHEN contact_type IN ('CorporateOwner', 'HeadOfficer', 'IndividualOwner', 'JointOwner', 'Officer', 'Shareholder', 'Owner') AND (business_address IS NULL OR business_address = '') THEN 1 END) as empty_address
+        FROM registration_contacts;
+    """)
+
+    result = await db.execute(query)
+    row = result.first()
+
+    owner_contacts = row.owner_type_contacts
+
+    return {
+        "total_contacts": row.total_contacts,
+        "owner_type_contacts": owner_contacts,
+        "with_hash": row.with_hash,
+        "with_hash_pct": round(100 * row.with_hash / owner_contacts, 1) if owner_contacts else 0,
+        "linked": row.linked,
+        "linked_pct": round(100 * row.linked / owner_contacts, 1) if owner_contacts else 0,
+        "empty_name": row.empty_name,
+        "empty_name_pct": round(100 * row.empty_name / owner_contacts, 1) if owner_contacts else 0,
+        "empty_address": row.empty_address,
+        "empty_address_pct": round(100 * row.empty_address / owner_contacts, 1) if owner_contacts else 0,
+    }
