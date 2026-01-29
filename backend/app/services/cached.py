@@ -130,6 +130,28 @@ class CachedBuildingService:
         await self._cache.set(cache_key, timeline, ttl=CacheTTL.MEDIUM)
         return timeline
 
+    async def get_recent_violations(
+        self,
+        limit: int = 50,
+        violation_class: Optional[str] = None,
+    ) -> list[dict]:
+        """Get recent violations across all buildings with caching."""
+        cache_key = make_cache_key(
+            f"{CacheKeys.BUILDING}:recent_violations",
+            limit=limit,
+            violation_class=violation_class
+        )
+
+        cached = await self._cache.get(cache_key)
+        if cached is not None:
+            return cached
+
+        violations = await self._service.get_recent_violations(
+            limit=limit, violation_class=violation_class
+        )
+        await self._cache.set(cache_key, violations, ttl=CacheTTL.SHORT)
+        return violations
+
 
 class CachedLeaderboardService:
     """Leaderboard service with caching support."""

@@ -115,3 +115,26 @@ class TimelineResponse(BaseModel):
     """Timeline response."""
     events: list[TimelineEvent]
     bbl: str
+
+
+class RecentViolationItem(BaseModel):
+    """Recent violation with building info."""
+    id: int
+    violation_class: Optional[str] = None
+    status: Optional[str]
+    inspection_date: Optional[str]
+    description: Optional[str]
+    apartment: Optional[str]
+    story: Optional[str]
+    bbl: str
+    address: Optional[str]
+    borough: Optional[str]
+
+    class Config:
+        populate_by_name = True
+
+
+class RecentViolationsResponse(BaseModel):
+    """Recent violations response."""
+    items: list[RecentViolationItem]
+    limit: int

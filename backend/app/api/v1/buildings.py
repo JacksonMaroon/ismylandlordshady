@@ -12,6 +12,8 @@ from app.schemas.building import (
     TimelineResponse,
     ViolationItem,
     TimelineEvent,
+    RecentViolationsResponse,
+    RecentViolationItem,
 )
 
 router = APIRouter()
@@ -32,6 +34,31 @@ async def search_buildings(
     service = CachedBuildingService(db)
     results = await service.search_buildings(q, limit=limit)
     return BuildingSearchResult(results=results, query=q)
+
+
+@router.get("/violations/recent", response_model=RecentViolationsResponse)
+async def get_recent_violations(
+    limit: int = Query(50, ge=1, le=100),
+    violation_class: Optional[str] = Query(
+        None, description="Filter by class (A, B, C)"
+    ),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Get recent HPD violations across all buildings.
+
+    Returns the most recent violations with building info.
+    Results are cached for 5 minutes.
+    """
+    service = CachedBuildingService(db)
+    violations = await service.get_recent_violations(
+        limit=limit, violation_class=violation_class
+    )
+
+    return RecentViolationsResponse(
+        items=[RecentViolationItem(**v) for v in violations],
+        limit=limit,
+    )
 
 
 @router.get("/{bbl}", response_model=BuildingReport)

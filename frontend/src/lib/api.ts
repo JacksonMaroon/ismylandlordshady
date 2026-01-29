@@ -102,3 +102,29 @@ export async function getWorstLandlords(options: {
   const response = await fetchApi<PaginatedResponse<LeaderboardLandlord>>(`/api/v1/leaderboards/worst-landlords?${params}`);
   return response.items;
 }
+
+// Recent violations API
+export interface RecentViolation {
+  id: number;
+  violation_class: string | null;
+  status: string | null;
+  inspection_date: string | null;
+  description: string | null;
+  apartment: string | null;
+  story: string | null;
+  bbl: string;
+  address: string | null;
+  borough: string | null;
+}
+
+export async function getRecentViolations(options: {
+  limit?: number;
+  violation_class?: string;
+} = {}): Promise<RecentViolation[]> {
+  const params = new URLSearchParams();
+  if (options.limit) params.set('limit', String(options.limit));
+  if (options.violation_class) params.set('violation_class', options.violation_class);
+
+  const response = await fetchApi<{ items: RecentViolation[] }>(`/api/v1/buildings/violations/recent?${params}`);
+  return response.items;
+}

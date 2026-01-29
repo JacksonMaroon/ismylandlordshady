@@ -368,6 +368,52 @@ class BuildingService:
             for row in result
         ]
 
+    async def get_recent_violations(
+        self,
+        limit: int = 50,
+        violation_class: Optional[str] = None,
+    ) -> list[dict]:
+        """Get recent violations across all buildings with building info."""
+        query = text("""
+            SELECT
+                v.violation_id,
+                v.violation_class,
+                v.current_status,
+                v.inspection_date,
+                v.nov_description,
+                v.apartment,
+                v.story,
+                b.bbl,
+                b.full_address,
+                b.borough
+            FROM hpd_violations v
+            JOIN buildings b ON v.bbl = b.bbl
+            WHERE v.inspection_date IS NOT NULL
+            AND (:violation_class IS NULL OR v.violation_class = :violation_class)
+            ORDER BY v.inspection_date DESC
+            LIMIT :limit
+        """)
+
+        result = await self.session.execute(
+            query, {"limit": limit, "violation_class": violation_class}
+        )
+
+        return [
+            {
+                "id": row.violation_id,
+                "class": row.violation_class,
+                "status": row.current_status,
+                "inspection_date": row.inspection_date.isoformat() if row.inspection_date else None,
+                "description": row.nov_description,
+                "apartment": row.apartment,
+                "story": row.story,
+                "bbl": row.bbl,
+                "address": row.full_address,
+                "borough": row.borough,
+            }
+            for row in result
+        ]
+
 
 class OwnerService:
     """Service for owner/portfolio-related queries."""
