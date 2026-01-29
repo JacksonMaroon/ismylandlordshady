@@ -95,7 +95,7 @@ export default function NeighborhoodPage({ params }: Props) {
                 const zipPrefix = neighborhoodData.zips.map(z => z.slice(0, 3));
                 const filtered = allBuildings.filter(b => {
                     const buildingZip = b.zip_code?.slice(0, 3);
-                    return zipPrefix.includes(buildingZip);
+                    return buildingZip ? zipPrefix.includes(buildingZip) : false;
                 });
                 setBuildings(filtered);
             })
