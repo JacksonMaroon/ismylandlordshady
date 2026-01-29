@@ -374,7 +374,16 @@ class BuildingService:
         violation_class: Optional[str] = None,
     ) -> list[dict]:
         """Get recent violations across all buildings with building info."""
-        query = text("""
+        # Use mappers for proper parameter binding with SQLAlchemy text()
+        params = {"limit": limit}
+        
+        if violation_class:
+            where_clause = "WHERE v.inspection_date IS NOT NULL AND v.violation_class = :violation_class"
+            params["violation_class"] = violation_class
+        else:
+            where_clause = "WHERE v.inspection_date IS NOT NULL"
+        
+        query = text(f"""
             SELECT
                 v.violation_id,
                 v.violation_class,
@@ -383,20 +392,17 @@ class BuildingService:
                 v.nov_description,
                 v.apartment,
                 v.story,
-                b.bbl,
+                v.bbl,
                 b.full_address,
                 b.borough
             FROM hpd_violations v
-            JOIN buildings b ON v.bbl = b.bbl
-            WHERE v.inspection_date IS NOT NULL
-            AND (:violation_class IS NULL OR v.violation_class = :violation_class)
+            LEFT JOIN buildings b ON v.bbl = b.bbl
+            {where_clause}
             ORDER BY v.inspection_date DESC
             LIMIT :limit
         """)
 
-        result = await self.session.execute(
-            query, {"limit": limit, "violation_class": violation_class}
-        )
+        result = await self.session.execute(query, params)
 
         return [
             {
