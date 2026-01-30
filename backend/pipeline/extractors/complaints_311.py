@@ -42,10 +42,9 @@ class Complaints311Extractor(BaseExtractor):
         return Complaint311
 
     @property
-    def where_clause(self) -> str:
-        """Filter to housing-related complaints."""
-        types = ", ".join(f"'{t}'" for t in self.HOUSING_COMPLAINT_TYPES)
-        return f"complaint_type IN ({types}) OR agency = 'HPD'"
+    def where_clause(self) -> str | None:
+        """No filter - include all complaint types for comprehensive data."""
+        return None
 
     @property
     def order_clause(self) -> str | None:
