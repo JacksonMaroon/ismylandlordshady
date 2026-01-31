@@ -17,6 +17,16 @@ export const metadata: Metadata = {
   title: 'NYCLandlordCheck | NYC Building & Landlord Transparency',
   description:
     'Check your NYC building and landlord records. View violations, complaints, evictions, and owner portfolios.',
+  icons: {
+    icon: [
+      { url: '/icon.svg', sizes: 'any', type: 'image/svg+xml' },
+      { url: '/icon-144.png', sizes: '144x144', type: 'image/png' },
+      { url: '/icon-96.png', sizes: '96x96', type: 'image/png' },
+      { url: '/icon-48.png', sizes: '48x48', type: 'image/png' },
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
   openGraph: {
     title: 'NYCLandlordCheck',
     description: 'NYC Building & Landlord Transparency',
