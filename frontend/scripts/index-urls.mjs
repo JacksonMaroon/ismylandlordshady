@@ -35,12 +35,14 @@ const INDEXING_API_ENDPOINT = 'https://indexing.googleapis.com/v3/urlNotificatio
 const URL_PATHS = [
   '/',
   '/about',
+  '/api',
   '/data-sources',
   '/leaderboard/buildings',
   '/leaderboard/landlords',
   '/map',
   '/methodology',
   '/neighborhoods',
+  '/privacy',
   '/violations/recent',
 ];
 

@@ -7,9 +7,53 @@ export const metadata = {
     alternates: { canonical: '/about' },
 };
 
+const FAQS = [
+    {
+        question: 'Is this data accurate?',
+        answer:
+            'We pull data directly from NYC Open Data, the official source for city records. However, data entry errors can occur at the source, and some records may be incomplete.',
+    },
+    {
+        question: 'How often is the data updated?',
+        answer: 'We refresh our data weekly. Scores are recalculated after each update to reflect the latest records.',
+    },
+    {
+        question: 'Can I trust the letter grades?',
+        answer:
+            "Grades are a helpful starting point, but we encourage you to look at the underlying data. A building with a 'C' grade might have one serious issue or many minor ones.",
+    },
+    {
+        question: 'Is this legal advice?',
+        answer:
+            'No. This tool is for informational purposes only. If you have legal concerns about a landlord or building, consult a tenant rights attorney.',
+    },
+    {
+        question: 'My building info is wrong. How do I fix it?',
+        answer:
+            \"We don't create this data—it comes from city agencies. If there's an error, you'll need to contact the relevant agency (HPD, DOB, etc.) to correct the source records.\",
+    },
+];
+
+const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQS.map((item) => ({
+        '@type': 'Question',
+        name: item.question,
+        acceptedAnswer: {
+            '@type': 'Answer',
+            text: item.answer,
+        },
+    })),
+};
+
 export default function AboutPage() {
     return (
         <div className="bg-[#FAF7F2] min-h-screen">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+            />
             <div className="max-w-3xl mx-auto px-4 py-12">
                 {/* Back Link */}
                 <Link href="/" className="inline-flex items-center gap-2 text-[#C65D3B] hover:underline text-sm mb-8">
@@ -74,26 +118,9 @@ export default function AboutPage() {
                         Frequently Asked Questions
                     </h2>
                     <div className="space-y-6">
-                        <FAQItem
-                            question="Is this data accurate?"
-                            answer="We pull data directly from NYC Open Data, the official source for city records. However, data entry errors can occur at the source, and some records may be incomplete."
-                        />
-                        <FAQItem
-                            question="How often is the data updated?"
-                            answer="We refresh our data weekly. Scores are recalculated after each update to reflect the latest records."
-                        />
-                        <FAQItem
-                            question="Can I trust the letter grades?"
-                            answer="Grades are a helpful starting point, but we encourage you to look at the underlying data. A building with a 'C' grade might have one serious issue or many minor ones."
-                        />
-                        <FAQItem
-                            question="Is this legal advice?"
-                            answer="No. This tool is for informational purposes only. If you have legal concerns about a landlord or building, consult a tenant rights attorney."
-                        />
-                        <FAQItem
-                            question="My building info is wrong. How do I fix it?"
-                            answer="We don't create this data—it comes from city agencies. If there's an error, you'll need to contact the relevant agency (HPD, DOB, etc.) to correct the source records."
-                        />
+                        {FAQS.map((item) => (
+                            <FAQItem key={item.question} question={item.question} answer={item.answer} />
+                        ))}
                     </div>
                 </section>
 

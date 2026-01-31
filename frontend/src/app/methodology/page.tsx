@@ -7,9 +7,33 @@ export const metadata = {
     alternates: { canonical: '/methodology' },
 };
 
+const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: 'Methodology',
+    description: 'How we calculate building and landlord grades using NYC Open Data.',
+    author: {
+        '@type': 'Organization',
+        name: 'NYCLandlordCheck',
+    },
+    publisher: {
+        '@type': 'Organization',
+        name: 'NYCLandlordCheck',
+        logo: {
+            '@type': 'ImageObject',
+            url: 'https://www.nyclandlordcheck.com/icon-144.png',
+        },
+    },
+    mainEntityOfPage: 'https://www.nyclandlordcheck.com/methodology',
+};
+
 export default function MethodologyPage() {
     return (
         <div className="bg-[#FAF7F2] min-h-screen">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+            />
             <div className="max-w-3xl mx-auto px-4 py-12">
                 {/* Back Link */}
                 <Link href="/" className="inline-flex items-center gap-2 text-[#C65D3B] hover:underline text-sm mb-8">

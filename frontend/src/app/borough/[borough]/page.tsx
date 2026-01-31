@@ -7,18 +7,11 @@ import { notFound } from 'next/navigation';
 import { getWorstBuildings } from '@/lib/api';
 import { cn, getGradeColor, formatNumber, formatScore } from '@/lib/utils';
 import type { LeaderboardBuilding } from '@/lib/types';
+import { BOROUGH_NAMES } from '@/lib/locations';
 
 interface Props {
     params: { borough: string };
 }
-
-const BOROUGH_NAMES: Record<string, string> = {
-    'manhattan': 'Manhattan',
-    'brooklyn': 'Brooklyn',
-    'queens': 'Queens',
-    'bronx': 'Bronx',
-    'staten-island': 'Staten Island',
-};
 
 export default function BoroughPage({ params }: Props) {
     const boroughName = BOROUGH_NAMES[params.borough];

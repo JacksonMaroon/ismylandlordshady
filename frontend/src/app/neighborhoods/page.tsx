@@ -1,18 +1,11 @@
 import Link from 'next/link';
 import { ArrowLeft, MapPin } from 'lucide-react';
+import { NEIGHBORHOODS_BY_BOROUGH, slugifyNeighborhood } from '@/lib/locations';
 
 export const metadata = {
     title: 'Browse by Neighborhood | NYCLandlordCheck',
     description: 'Explore NYC buildings and landlords by neighborhood.',
     alternates: { canonical: '/neighborhoods' },
-};
-
-const NEIGHBORHOODS = {
-    manhattan: ['Upper East Side', 'Upper West Side', 'Harlem', 'East Village', 'West Village', 'Chelsea', 'Midtown', 'Financial District', 'SoHo', 'Tribeca'],
-    brooklyn: ['Williamsburg', 'Park Slope', 'Bushwick', 'Bedford-Stuyvesant', 'Crown Heights', 'Flatbush', 'DUMBO', 'Greenpoint', 'Bay Ridge', 'Sunset Park'],
-    queens: ['Astoria', 'Long Island City', 'Flushing', 'Jackson Heights', 'Jamaica', 'Forest Hills', 'Ridgewood', 'Sunnyside', 'Corona', 'Elmhurst'],
-    bronx: ['South Bronx', 'Fordham', 'Riverdale', 'Kingsbridge', 'Mott Haven', 'Hunts Point', 'Tremont', 'Pelham Bay', 'Parkchester', 'Soundview'],
-    'staten-island': ['St. George', 'Stapleton', 'New Dorp', 'Tottenville', 'Great Kills', 'Port Richmond', 'West Brighton'],
 };
 
 export default function NeighborhoodsPage() {
@@ -31,7 +24,7 @@ export default function NeighborhoodsPage() {
                     Select a neighborhood to see buildings, landlords, and violation data.
                 </p>
 
-                {Object.entries(NEIGHBORHOODS).map(([borough, neighborhoods]) => (
+                {Object.entries(NEIGHBORHOODS_BY_BOROUGH).map(([borough, neighborhoods]) => (
                     <section key={borough} className="mb-10">
                         <h2 className="font-serif text-2xl font-bold text-[#1A1A1A] mb-4 capitalize">
                             {borough.replace('-', ' ')}
@@ -40,7 +33,7 @@ export default function NeighborhoodsPage() {
                             {neighborhoods.map((neighborhood) => (
                                 <Link
                                     key={neighborhood}
-                                    href={`/neighborhood/${encodeURIComponent(neighborhood.toLowerCase().replace(/ /g, '-'))}`}
+                                    href={`/neighborhood/${encodeURIComponent(slugifyNeighborhood(neighborhood))}`}
                                     className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-[#D4CFC4] rounded-full text-sm text-[#1A1A1A] hover:border-[#C65D3B] hover:text-[#C65D3B] transition-colors"
                                 >
                                     <MapPin className="w-3 h-3" />

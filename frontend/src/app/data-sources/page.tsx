@@ -7,9 +7,76 @@ export const metadata = {
     alternates: { canonical: '/data-sources' },
 };
 
+const DATA_SOURCES = [
+    {
+        title: 'HPD Violations',
+        description:
+            'Housing code violations issued by the NYC Department of Housing Preservation and Development. Includes violation class (A, B, C), status, and description.',
+        records: '6M+',
+        updateFrequency: 'Weekly',
+        url: 'https://data.cityofnewyork.us/Housing-Development/Housing-Maintenance-Code-Violations/wvxf-dwi5',
+    },
+    {
+        title: 'HPD Registrations',
+        description:
+            'Property registration records including building ownership information, rent stabilization status, and registration contacts.',
+        records: '250K+',
+        updateFrequency: 'Monthly',
+        url: 'https://data.cityofnewyork.us/Housing-Development/Multiple-Dwelling-Registrations/tesw-yqqr',
+    },
+    {
+        title: '311 Complaints',
+        description:
+            'Heating, hot water, mold, pest, and other housing complaints filed by residents. Includes complaint type and resolution status.',
+        records: '5M+',
+        updateFrequency: 'Weekly',
+        url: 'https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9',
+    },
+    {
+        title: 'DOB Violations',
+        description:
+            'Building code violations from the Department of Buildings covering structural issues, illegal conversions, and construction violations.',
+        records: '500K+',
+        updateFrequency: 'Weekly',
+        url: 'https://data.cityofnewyork.us/Housing-Development/DOB-Violations/3h2n-5cm9',
+    },
+    {
+        title: 'Eviction Records',
+        description:
+            'Marshal eviction records showing legal evictions executed in NYC. Data is geocoded to building addresses.',
+        records: '100K+',
+        updateFrequency: 'Monthly',
+        url: 'https://data.cityofnewyork.us/City-Government/Evictions/6z8x-wfk4',
+    },
+];
+
+const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'NYC Open Data Sources',
+    itemListElement: DATA_SOURCES.map((source, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        item: {
+            '@type': 'Dataset',
+            name: source.title,
+            description: source.description,
+            url: source.url,
+            creator: {
+                '@type': 'Organization',
+                name: 'NYC Open Data',
+            },
+        },
+    })),
+};
+
 export default function DataSourcesPage() {
     return (
         <div className="bg-[#FAF7F2] min-h-screen">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+            />
             <div className="max-w-3xl mx-auto px-4 py-12">
                 {/* Back Link */}
                 <Link href="/" className="inline-flex items-center gap-2 text-[#C65D3B] hover:underline text-sm mb-8">
@@ -27,45 +94,16 @@ export default function DataSourcesPage() {
 
                 {/* Data Sources List */}
                 <div className="space-y-6">
-                    <DataSourceCard
-                        title="HPD Violations"
-                        description="Housing code violations issued by the NYC Department of Housing Preservation and Development. Includes violation class (A, B, C), status, and description."
-                        records="6M+"
-                        updateFrequency="Weekly"
-                        url="https://data.cityofnewyork.us/Housing-Development/Housing-Maintenance-Code-Violations/wvxf-dwi5"
-                    />
-
-                    <DataSourceCard
-                        title="HPD Registrations"
-                        description="Property registration records including building ownership information, rent stabilization status, and registration contacts."
-                        records="250K+"
-                        updateFrequency="Monthly"
-                        url="https://data.cityofnewyork.us/Housing-Development/Multiple-Dwelling-Registrations/tesw-yqqr"
-                    />
-
-                    <DataSourceCard
-                        title="311 Complaints"
-                        description="Heating, hot water, mold, pest, and other housing complaints filed by residents. Includes complaint type and resolution status."
-                        records="5M+"
-                        updateFrequency="Weekly"
-                        url="https://data.cityofnewyork.us/Social-Services/311-Service-Requests-from-2010-to-Present/erm2-nwe9"
-                    />
-
-                    <DataSourceCard
-                        title="DOB Violations"
-                        description="Building code violations from the Department of Buildings covering structural issues, illegal conversions, and construction violations."
-                        records="500K+"
-                        updateFrequency="Weekly"
-                        url="https://data.cityofnewyork.us/Housing-Development/DOB-Violations/3h2n-5cm9"
-                    />
-
-                    <DataSourceCard
-                        title="Eviction Records"
-                        description="Marshal eviction records showing legal evictions executed in NYC. Data is geocoded to building addresses."
-                        records="100K+"
-                        updateFrequency="Monthly"
-                        url="https://data.cityofnewyork.us/City-Government/Evictions/6z8x-wfk4"
-                    />
+                    {DATA_SOURCES.map((source) => (
+                        <DataSourceCard
+                            key={source.title}
+                            title={source.title}
+                            description={source.description}
+                            records={source.records}
+                            updateFrequency={source.updateFrequency}
+                            url={source.url}
+                        />
+                    ))}
                 </div>
 
                 {/* Disclaimer */}
