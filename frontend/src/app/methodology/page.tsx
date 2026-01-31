@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 export const metadata = {
     title: 'Methodology | NYCLandlordCheck',
     description: 'How we calculate building and landlord grades using NYC Open Data.',
+    alternates: { canonical: '/methodology' },
 };
 
 export default function MethodologyPage() {

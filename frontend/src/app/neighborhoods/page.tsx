@@ -4,6 +4,7 @@ import { ArrowLeft, MapPin } from 'lucide-react';
 export const metadata = {
     title: 'Browse by Neighborhood | NYCLandlordCheck',
     description: 'Explore NYC buildings and landlords by neighborhood.',
+    alternates: { canonical: '/neighborhoods' },
 };
 
 const NEIGHBORHOODS = {

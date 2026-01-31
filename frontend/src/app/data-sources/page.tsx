@@ -4,6 +4,7 @@ import { ArrowLeft, ExternalLink } from 'lucide-react';
 export const metadata = {
     title: 'Data Sources | NYCLandlordCheck',
     description: 'NYC Open Data sources we use to compile building and landlord records.',
+    alternates: { canonical: '/data-sources' },
 };
 
 export default function DataSourcesPage() {

@@ -4,6 +4,7 @@ import { ArrowLeft, Map } from 'lucide-react';
 export const metadata = {
     title: 'NYC Building Map | NYCLandlordCheck',
     description: 'Interactive map of NYC buildings with violation and landlord data.',
+    alternates: { canonical: '/map' },
 };
 
 export default function MapPage() {

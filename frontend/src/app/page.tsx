@@ -1,9 +1,12 @@
-'use client';
-
 import { SearchBox } from '@/components/building/SearchBox';
 import { NYCBoroughMap } from '@/components/ui/NYCBoroughMap';
 import Link from 'next/link';
 import { MapPin, Layers, AlertTriangle } from 'lucide-react';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+};
 
 export default function HomePage() {
   return (

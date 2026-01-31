@@ -4,6 +4,7 @@ import { ArrowLeft, Shield, Eye, Scale } from 'lucide-react';
 export const metadata = {
     title: 'About | NYCLandlordCheck',
     description: 'Our mission to bring transparency to NYC housing through public data.',
+    alternates: { canonical: '/about' },
 };
 
 export default function AboutPage() {
