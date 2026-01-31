@@ -33,12 +33,59 @@ export const metadata: Metadata = {
     url: 'https://www.nyclandlordcheck.com',
     siteName: 'NYCLandlordCheck',
     type: 'website',
+    images: [
+      {
+        url: '/opengraph-image',
+        width: 1200,
+        height: 630,
+        alt: 'NYCLandlordCheck',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'NYCLandlordCheck',
     description: 'Check your NYC building and landlord records',
+    images: ['/twitter-image'],
   },
+};
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': 'https://www.nyclandlordcheck.com/#organization',
+      name: 'NYCLandlordCheck',
+      url: 'https://www.nyclandlordcheck.com',
+      email: 'hello@nyclandlordcheck.com',
+      logo: {
+        '@type': 'ImageObject',
+        '@id': 'https://www.nyclandlordcheck.com/#logo',
+        url: 'https://www.nyclandlordcheck.com/icon-144.png',
+        width: 144,
+        height: 144,
+        caption: 'NYCLandlordCheck',
+      },
+    },
+    {
+      '@type': 'WebSite',
+      '@id': 'https://www.nyclandlordcheck.com/#website',
+      url: 'https://www.nyclandlordcheck.com/',
+      name: 'NYCLandlordCheck',
+      description:
+        'Check your NYC building and landlord records. View violations, complaints, evictions, and owner portfolios.',
+      inLanguage: 'en-US',
+      publisher: { '@id': 'https://www.nyclandlordcheck.com/#organization' },
+      image: { '@id': 'https://www.nyclandlordcheck.com/#logo' },
+      potentialAction: {
+        '@type': 'SearchAction',
+        target:
+          'https://www.google.com/search?q=site:nyclandlordcheck.com+{search_term_string}',
+        'query-input': 'required name=search_term_string',
+      },
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -49,6 +96,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${playfair.variable} font-sans`}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
         <Providers>
           <div className="min-h-screen flex flex-col">
             <Header />
