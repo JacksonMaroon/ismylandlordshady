@@ -10,8 +10,8 @@ interface Props {
 
 export function BuildingDetails({ building }: Props) {
   return (
-    <div className="bg-white rounded-xl border p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">
+    <div className="bg-white border border-[#D4CFC4] rounded-xl p-6">
+      <h2 className="font-serif text-lg font-bold text-[#1A1A1A] mb-4">
         Building Details
       </h2>
 
@@ -48,25 +48,25 @@ export function BuildingDetails({ building }: Props) {
       </div>
 
       {/* Quick Stats */}
-      <div className="mt-6 pt-4 border-t">
+      <div className="mt-6 pt-4 border-t border-[#D4CFC4]">
         <div className="grid grid-cols-3 gap-4 text-center">
           <div>
-            <div className="text-lg font-bold text-gray-900">
+            <div className="font-serif text-lg font-bold text-[#1A1A1A]">
               {formatNumber(building.complaints.total)}
             </div>
-            <div className="text-xs text-gray-500">311 Complaints</div>
+            <div className="text-xs text-[#8A8A8A]">311 Complaints</div>
           </div>
           <div>
-            <div className="text-lg font-bold text-gray-900">
+            <div className="font-serif text-lg font-bold text-[#1A1A1A]">
               {formatNumber(building.complaints.last_year)}
             </div>
-            <div className="text-xs text-gray-500">Last Year</div>
+            <div className="text-xs text-[#8A8A8A]">Last Year</div>
           </div>
           <div>
-            <div className="text-lg font-bold text-gray-900">
+            <div className="font-serif text-lg font-bold text-[#C65D3B]">
               {formatNumber(building.evictions.total)}
             </div>
-            <div className="text-xs text-gray-500">Evictions</div>
+            <div className="text-xs text-[#8A8A8A]">Evictions</div>
           </div>
         </div>
       </div>
@@ -87,10 +87,10 @@ function DetailRow({
 
   return (
     <div className="flex items-center gap-3">
-      <div className="text-gray-400">{icon}</div>
+      <div className="text-[#8A8A8A]">{icon}</div>
       <div>
-        <div className="text-xs text-gray-500">{label}</div>
-        <div className="text-sm font-medium text-gray-900">{value}</div>
+        <div className="text-xs text-[#8A8A8A]">{label}</div>
+        <div className="text-sm font-medium text-[#1A1A1A]">{value}</div>
       </div>
     </div>
   );

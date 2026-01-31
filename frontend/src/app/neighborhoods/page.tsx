@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { ArrowLeft, MapPin } from 'lucide-react';
 
 export const metadata = {
-    title: 'Browse by Neighborhood | IsMyLandlordShady.nyc',
+    title: 'Browse by Neighborhood | NYCLandlordCheck',
     description: 'Explore NYC buildings and landlords by neighborhood.',
 };
 

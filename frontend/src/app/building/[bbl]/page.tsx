@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props) {
   try {
     const building = await getBuilding(params.bbl);
     return {
-      title: `${building.address} | IsMyLandlordShady.nyc`,
+      title: `${building.address} | NYCLandlordCheck`,
       description: `Building report for ${building.address}. Grade: ${building.score?.grade ?? 'N/A'}. ${building.violations.total} violations, ${building.complaints.total} complaints.`,
       openGraph: {
         title: `${building.address} - Grade ${building.score?.grade ?? 'N/A'}`,
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props) {
     };
   } catch {
     return {
-      title: 'Building Not Found | IsMyLandlordShady.nyc',
+      title: 'Building Not Found | NYCLandlordCheck',
     };
   }
 }

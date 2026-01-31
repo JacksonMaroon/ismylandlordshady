@@ -8,7 +8,9 @@ import type {
   LeaderboardLandlord,
 } from './types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
+const RAW_API_BASE = (process.env.NEXT_PUBLIC_API_URL || '').trim();
+// Use relative /api in the browser to avoid CORS; server uses absolute backend URL.
+const API_BASE = typeof window === 'undefined' ? RAW_API_BASE : '';
 
 async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE}${endpoint}`, {

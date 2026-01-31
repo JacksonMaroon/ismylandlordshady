@@ -9,15 +9,15 @@ export function cn(...inputs: ClassValue[]) {
 export function getGradeColor(grade: string | null | undefined): string {
   switch (grade?.toUpperCase()) {
     case 'A':
-      return 'bg-grade-a text-white';
+      return 'bg-green-500 text-white';
     case 'B':
-      return 'bg-grade-b text-white';
+      return 'bg-lime-500 text-white';
     case 'C':
-      return 'bg-grade-c text-black';
+      return 'bg-yellow-500 text-black';
     case 'D':
-      return 'bg-grade-d text-white';
+      return 'bg-orange-500 text-white';
     case 'F':
-      return 'bg-grade-f text-white';
+      return 'bg-red-500 text-white';
     default:
       return 'bg-gray-400 text-white';
   }
@@ -26,15 +26,15 @@ export function getGradeColor(grade: string | null | undefined): string {
 export function getGradeTextColor(grade: string | null | undefined): string {
   switch (grade?.toUpperCase()) {
     case 'A':
-      return 'text-grade-a';
+      return 'text-green-500';
     case 'B':
-      return 'text-grade-b';
+      return 'text-lime-500';
     case 'C':
-      return 'text-grade-c';
+      return 'text-yellow-500';
     case 'D':
-      return 'text-grade-d';
+      return 'text-orange-500';
     case 'F':
-      return 'text-grade-f';
+      return 'text-red-500';
     default:
       return 'text-gray-400';
   }

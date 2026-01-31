@@ -12,12 +12,12 @@ export async function generateMetadata({ params }: Props) {
   try {
     const portfolio = await getOwnerPortfolio(parseInt(params.id));
     return {
-      title: `${portfolio.name} Portfolio | IsMyLandlordShady.nyc`,
+      title: `${portfolio.name} Portfolio | NYCLandlordCheck`,
       description: `Landlord portfolio: ${portfolio.stats.total_buildings} buildings, ${portfolio.stats.total_units} units, ${portfolio.stats.total_violations} violations.`,
     };
   } catch {
     return {
-      title: 'Portfolio Not Found | IsMyLandlordShady.nyc',
+      title: 'Portfolio Not Found | NYCLandlordCheck',
     };
   }
 }
