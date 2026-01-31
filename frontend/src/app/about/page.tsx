@@ -30,7 +30,7 @@ const FAQS = [
     {
         question: 'My building info is wrong. How do I fix it?',
         answer:
-            \"We don't create this data—it comes from city agencies. If there's an error, you'll need to contact the relevant agency (HPD, DOB, etc.) to correct the source records.\",
+            'We don\'t create this data—it comes from city agencies. If there\'s an error, you\'ll need to contact the relevant agency (HPD, DOB, etc.) to correct the source records.',
     },
 ];
 
