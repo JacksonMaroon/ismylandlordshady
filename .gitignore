@@ -60,6 +60,8 @@ docker-compose.override.yml
 data/
 *.csv
 *.json.gz
+*.dump
+*.sql
 
 # Alembic
 alembic/versions/*.pyc
@@ -68,3 +70,4 @@ alembic/versions/*.pyc
 *.bak
 *.tmp
 .cache/
+preview.html
